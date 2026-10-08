@@ -1,0 +1,275 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account linking authenticated user to restaurant and role",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "restaurantId": { "type": "string" },
+        "role": { "type": "string", "enum": ["OWNER", "MANAGER", "WAITER", "CHEF", "CASHIER"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "email", "restaurantId", "role"]
+    },
+    "Restaurant": {
+      "title": "Restaurant",
+      "description": "Restaurant profile, settings, and billing configurations",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "city": { "type": "string" },
+        "currency": { "type": "string" },
+        "taxRate": { "type": "number" },
+        "serviceCharge": { "type": "number" },
+        "setupCompleted": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "ownerId", "name", "currency"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Food menu category",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "restaurantId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "displayOrder": { "type": "number" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "restaurantId", "name", "isActive"]
+    },
+    "FoodItem": {
+      "title": "FoodItem",
+      "description": "Menu food item with pricing, station assignment, availability, variants, and addons",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "restaurantId": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "prepTimeMinutes": { "type": "number" },
+        "isAvailable": { "type": "boolean" },
+        "stationId": { "type": "string" },
+        "stationName": { "type": "string" },
+        "variants": { "type": "string" },
+        "addons": { "type": "string" },
+        "ingredients": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "restaurantId", "categoryId", "name", "price", "isAvailable"]
+    },
+    "Table": {
+      "title": "Table",
+      "description": "Restaurant dining table with floor, capacity, status, and QR code",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "restaurantId": { "type": "string" },
+        "tableNumber": { "type": "string" },
+        "capacity": { "type": "number" },
+        "floor": { "type": "string" },
+        "status": { "type": "string", "enum": ["AVAILABLE", "OCCUPIED", "RESERVED", "CLEANING", "DISABLED"] },
+        "qrCode": { "type": "string" },
+        "currentOrderId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "restaurantId", "tableNumber", "capacity", "floor", "status"]
+    },
+    "KitchenStation": {
+      "title": "KitchenStation",
+      "description": "Kitchen prep station for order fulfillment routing",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "restaurantId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "restaurantId", "name", "isActive"]
+    },
+    "Staff": {
+      "title": "Staff",
+      "description": "Restaurant employee account and permission assignment",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "restaurantId": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["OWNER", "MANAGER", "WAITER", "CHEF", "CASHIER", "KITCHEN_STAFF"] },
+        "status": { "type": "string", "enum": ["ACTIVE", "SUSPENDED", "DISABLED"] },
+        "assignedStation": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "restaurantId", "name", "role", "status"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Dine-in or takeaway order containing items, station statuses, and payment data",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "orderNumber": { "type": "string" },
+        "restaurantId": { "type": "string" },
+        "tableId": { "type": "string" },
+        "tableNumber": { "type": "string" },
+        "status": { "type": "string", "enum": ["DRAFT", "NEW", "ACCEPTED", "PREPARING", "READY", "SERVED", "COMPLETED", "CANCELLED"] },
+        "paymentStatus": { "type": "string", "enum": ["PENDING", "PAID", "REFUNDED"] },
+        "paymentMethod": { "type": "string", "enum": ["CASH", "CARD", "QR", "OTHER"] },
+        "subtotal": { "type": "number" },
+        "discount": { "type": "number" },
+        "tax": { "type": "number" },
+        "serviceCharge": { "type": "number" },
+        "total": { "type": "number" },
+        "itemsJson": { "type": "string" },
+        "cancelReason": { "type": "string" },
+        "cancelledBy": { "type": "string" },
+        "serverName": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "orderNumber", "restaurantId", "status", "paymentStatus", "total"]
+    },
+    "InventoryItem": {
+      "title": "InventoryItem",
+      "description": "Raw ingredient stock tracking",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "restaurantId": { "type": "string" },
+        "ingredientName": { "type": "string" },
+        "currentStock": { "type": "number" },
+        "unit": { "type": "string" },
+        "minStock": { "type": "number" },
+        "supplier": { "type": "string" },
+        "costPerUnit": { "type": "number" },
+        "status": { "type": "string", "enum": ["GOOD", "LOW_STOCK"] },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "restaurantId", "ingredientName", "currentStock", "unit", "minStock"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "Operating expenditure logging",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "restaurantId": { "type": "string" },
+        "amount": { "type": "number" },
+        "category": { "type": "string", "enum": ["INGREDIENTS", "RENT", "ELECTRICITY", "SALARIES", "MAINTENANCE", "OTHER"] },
+        "description": { "type": "string" },
+        "date": { "type": "string" },
+        "addedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "restaurantId", "amount", "category", "description", "date"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Customer record for order history and favorites",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "restaurantId": { "type": "string" },
+        "name": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "orderCount": { "type": "number" },
+        "totalSpent": { "type": "number" },
+        "lastOrderDate": { "type": "string" },
+        "favoriteItems": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "restaurantId", "name", "phone"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Immutable operational audit record for critical changes",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "restaurantId": { "type": "string" },
+        "action": { "type": "string" },
+        "user": { "type": "string" },
+        "previousState": { "type": "string" },
+        "newState": { "type": "string" },
+        "reason": { "type": "string" },
+        "details": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "restaurantId", "action", "user", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Root user profile"
+    },
+    "/restaurants/{restaurantId}": {
+      "schema": { "$ref": "#/entities/Restaurant" },
+      "description": "Restaurant profile"
+    },
+    "/restaurants/{restaurantId}/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Food menu categories"
+    },
+    "/restaurants/{restaurantId}/foodItems/{itemId}": {
+      "schema": { "$ref": "#/entities/FoodItem" },
+      "description": "Food items on menu"
+    },
+    "/restaurants/{restaurantId}/tables/{tableId}": {
+      "schema": { "$ref": "#/entities/Table" },
+      "description": "Dining tables and QR codes"
+    },
+    "/restaurants/{restaurantId}/kitchenStations/{stationId}": {
+      "schema": { "$ref": "#/entities/KitchenStation" },
+      "description": "Kitchen prep stations"
+    },
+    "/restaurants/{restaurantId}/staff/{staffId}": {
+      "schema": { "$ref": "#/entities/Staff" },
+      "description": "Restaurant staff members"
+    },
+    "/restaurants/{restaurantId}/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Restaurant customer orders"
+    },
+    "/restaurants/{restaurantId}/inventory/{inventoryId}": {
+      "schema": { "$ref": "#/entities/InventoryItem" },
+      "description": "Ingredient inventory items"
+    },
+    "/restaurants/{restaurantId}/expenses/{expenseId}": {
+      "schema": { "$ref": "#/entities/Expense" },
+      "description": "Restaurant expense entries"
+    },
+    "/restaurants/{restaurantId}/customers/{customerId}": {
+      "schema": { "$ref": "#/entities/Customer" },
+      "description": "Customer profiles"
+    },
+    "/restaurants/{restaurantId}/auditLogs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "Operational audit logs"
+    }
+  }
+}

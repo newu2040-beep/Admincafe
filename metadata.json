@@ -1,0 +1,6 @@
+{
+  "name": "ADMINCAFE",
+  "description": "Restaurant Management & Operations Platform for menus, orders, tables, kitchen stations, staff, and sales.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

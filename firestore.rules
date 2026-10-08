@@ -1,0 +1,184 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwnerOfUser(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwnerOfUser(userId) && isValidUserProfile(request.resource.data);
+      allow delete: if isOwnerOfUser(userId);
+    }
+
+    function isValidUserProfile(data) {
+      return data.id is string &&
+             data.email is string &&
+             data.restaurantId is string &&
+             data.role in ['OWNER', 'MANAGER', 'WAITER', 'CHEF', 'CASHIER'];
+    }
+
+    // Restaurants
+    match /restaurants/{restaurantId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() &&
+                      request.resource.data.ownerId == request.auth.uid &&
+                      isValidRestaurant(request.resource.data);
+      allow update: if isAuthenticated() &&
+                      isValidRestaurant(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.ownerId == request.auth.uid;
+
+      // Subcollections
+      match /categories/{categoryId} {
+        allow read: if isAuthenticated();
+        allow create, update: if isAuthenticated() && isValidCategory(request.resource.data);
+        allow delete: if isAuthenticated();
+      }
+
+      match /foodItems/{itemId} {
+        allow read: if isAuthenticated();
+        allow create, update: if isAuthenticated() && isValidFoodItem(request.resource.data);
+        allow delete: if isAuthenticated();
+      }
+
+      match /tables/{tableId} {
+        allow read: if isAuthenticated();
+        allow create, update: if isAuthenticated() && isValidTable(request.resource.data);
+        allow delete: if isAuthenticated();
+      }
+
+      match /kitchenStations/{stationId} {
+        allow read: if isAuthenticated();
+        allow create, update: if isAuthenticated() && isValidKitchenStation(request.resource.data);
+        allow delete: if isAuthenticated();
+      }
+
+      match /staff/{staffId} {
+        allow read: if isAuthenticated();
+        allow create, update: if isAuthenticated() && isValidStaff(request.resource.data);
+        allow delete: if isAuthenticated();
+      }
+
+      match /orders/{orderId} {
+        allow read: if isAuthenticated();
+        allow create, update: if isAuthenticated() && isValidOrder(request.resource.data);
+        allow delete: if isAuthenticated();
+      }
+
+      match /inventory/{inventoryId} {
+        allow read: if isAuthenticated();
+        allow create, update: if isAuthenticated() && isValidInventory(request.resource.data);
+        allow delete: if isAuthenticated();
+      }
+
+      match /expenses/{expenseId} {
+        allow read: if isAuthenticated();
+        allow create, update: if isAuthenticated() && isValidExpense(request.resource.data);
+        allow delete: if isAuthenticated();
+      }
+
+      match /customers/{customerId} {
+        allow read: if isAuthenticated();
+        allow create, update: if isAuthenticated() && isValidCustomer(request.resource.data);
+        allow delete: if isAuthenticated();
+      }
+
+      match /auditLogs/{logId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && isValidAuditLog(request.resource.data);
+        allow update, delete: if false; // Immutable audit log
+      }
+    }
+
+    function isValidRestaurant(data) {
+      return data.id is string &&
+             data.ownerId is string &&
+             data.name is string &&
+             data.currency is string;
+    }
+
+    function isValidCategory(data) {
+      return data.id is string &&
+             data.restaurantId is string &&
+             data.name is string;
+    }
+
+    function isValidFoodItem(data) {
+      return data.id is string &&
+             data.restaurantId is string &&
+             data.categoryId is string &&
+             data.name is string &&
+             data.price is number;
+    }
+
+    function isValidTable(data) {
+      return data.id is string &&
+             data.restaurantId is string &&
+             data.tableNumber is string &&
+             data.capacity is number &&
+             data.floor is string &&
+             data.status in ['AVAILABLE', 'OCCUPIED', 'RESERVED', 'CLEANING', 'DISABLED'];
+    }
+
+    function isValidKitchenStation(data) {
+      return data.id is string &&
+             data.restaurantId is string &&
+             data.name is string;
+    }
+
+    function isValidStaff(data) {
+      return data.id is string &&
+             data.restaurantId is string &&
+             data.name is string &&
+             data.role in ['OWNER', 'MANAGER', 'WAITER', 'CHEF', 'CASHIER', 'KITCHEN_STAFF'] &&
+             data.status in ['ACTIVE', 'SUSPENDED', 'DISABLED'];
+    }
+
+    function isValidOrder(data) {
+      return data.id is string &&
+             data.orderNumber is string &&
+             data.restaurantId is string &&
+             data.status in ['DRAFT', 'NEW', 'ACCEPTED', 'PREPARING', 'READY', 'SERVED', 'COMPLETED', 'CANCELLED'] &&
+             data.paymentStatus in ['PENDING', 'PAID', 'REFUNDED'] &&
+             data.total is number;
+    }
+
+    function isValidInventory(data) {
+      return data.id is string &&
+             data.restaurantId is string &&
+             data.ingredientName is string &&
+             data.currentStock is number &&
+             data.unit is string &&
+             data.minStock is number;
+    }
+
+    function isValidExpense(data) {
+      return data.id is string &&
+             data.restaurantId is string &&
+             data.amount is number &&
+             data.category in ['INGREDIENTS', 'RENT', 'ELECTRICITY', 'SALARIES', 'MAINTENANCE', 'OTHER'] &&
+             data.description is string &&
+             data.date is string;
+    }
+
+    function isValidCustomer(data) {
+      return data.id is string &&
+             data.restaurantId is string &&
+             data.name is string &&
+             data.phone is string;
+    }
+
+    function isValidAuditLog(data) {
+      return data.id is string &&
+             data.restaurantId is string &&
+             data.action is string &&
+             data.user is string;
+    }
+  }
+}
